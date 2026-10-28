@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>Retorno do login</title>
+<style>
+  :root { color-scheme: light dark; --fg: #1d1d1f; --bg: #fff; --muted: #555; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #eee; --bg: #161616; --muted: #aaa; } }
+  body { font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg);
+         max-width: 34rem; margin: 3rem auto; padding: 0 16px; line-height: 1.5; }
+  p { color: var(--muted); }
+  button { font: inherit; padding: .5rem 1rem; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Retorno do Mercado Livre</h1>
+<p id="msg">Repassando a autorização para o programa de login no seu computador...</p>
+<p id="fallback" hidden>
+  Se o terminal não confirmou o login, copie a URL desta página e cole no terminal
+  onde o <code>npm run login</code> está rodando.
+  <br><br><button id="copy" type="button">Copiar URL</button>
+</p>
+<script>
+  // Página estática: não guarda nem envia nada a servidor algum. Só repassa
+  // code e state ao processo de login local, que confere o state e faz a troca
+  // com o code_verifier (PKCE). Mude a porta se mudar ML_CALLBACK_PORT no .env.
+  var LOCAL_CALLBACK = "http://127.0.0.1:53682/callback";
+  var params = new URLSearchParams(location.search);
+  var fallback = document.getElementById("fallback");
+  document.getElementById("copy").onclick = function () {
+    navigator.clipboard.writeText(location.href).then(function () {
+      document.getElementById("copy").textContent = "Copiada";
+    });
+  };
+  if ((params.get("code") || params.get("error")) && params.get("state")) {
+    setTimeout(function () { fallback.hidden = false; }, 3000);
+    location.replace(LOCAL_CALLBACK + location.search);
+  } else {
+    document.getElementById("msg").textContent =
+      "Esta página só recebe o retorno do login do Mercado Livre. Nada a fazer aqui.";
+  }
+</script>
+</body>
+</html>
